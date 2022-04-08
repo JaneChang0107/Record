@@ -148,22 +148,15 @@ tr:last-child td:last-child {
 
 
 		<button class="btn-outline-secondary btn" type="button" id="addData">填完送出</button>
-		<button class="btn-outline-secondary btn" Type="Button"
-			onClick="history.go(0)">重新整理</button>
+		<input type="reset" style="display:none;" />
 
 
 	</div>
 </form> 
 	<div class="container">
-		<div class="py-5">
-
-			</br>
-			<div class="py-5">
-				<div>
-
-					<table id="contentTable" class="table table-dark table-hover"
+		<table id="contentTable" class="table table-dark table-hover"
 						border="0" width="30%">
-						<thead class="table-dark">
+						<thead class="table-dark" id="header">
 							<tr align=center>
 								<th>ID</th>
 								<th>時間</th>
@@ -174,7 +167,8 @@ tr:last-child td:last-child {
 								<th>修改</th>
 							</tr>
 						</thead>
-						
+						<!--<tbody id="repeatData"></tbody>  -->
+						<tbody id="repeatData">
 						<c:forEach var="TimeTable" items="${TimeTable}" varStatus="loop">
 						
 
@@ -198,12 +192,9 @@ tr:last-child td:last-child {
 							</tr>
 
 						</c:forEach>
-					
+					</tbody>
 					</table>
 				</div>
-			</div>
-		</div>
-	</div>
 
 
 	<!-- Modal -->
@@ -222,7 +213,7 @@ tr:last-child td:last-child {
 						<div class="col-md-6 mb-3">
 							<label for="time">日期</label> <input type="text"
 								class="form-control" id="updateDatepicker" name="timetable.time"
-								placeholder="" required>
+								placeholder="">
 						</div>
 					</div>
 
@@ -230,14 +221,14 @@ tr:last-child td:last-child {
 						<div class="col-md-1 mb-3">
 							<label for="hour">時數</label> <input type="text"
 								class="form-control" id="updateHour" name="timetable.hour"
-								placeholder="" value="" required>
+								placeholder="" value="">
 						</div>
 					</div>
 					<div class="form-group">
 						<div class="col-md-6 mb-3">
 							<label for="comment">概要</label> <input type="text"
 								class="form-control" id="updateComment" name="timetable.comment"
-								style="min-width: 50%" required>
+								style="min-width: 50%">
 						</div>
 					</div>
 					<div class="form-group col-md-2">
@@ -262,6 +253,56 @@ tr:last-child td:last-child {
 </body>
 <script>
 	$(document).ready(function() {
+		/* $.ajax({
+			url : "/getAllRecords",
+			method : "GET",
+			success : function(data) {
+				var fragment="";
+				$.each(data, function (index, data) {          
+					 var pk=data.pk;
+					 var time=data.time;
+					 var description = data.description;
+					 var comment = data.comment;
+					 var type = data.type;
+					 var hour = data.hour;
+					fragment +=
+						"<tr align='center'>"
+						+"<td id="+pk+" value="+pk+">"+pk
+						+"</td><td id='time' value="+time+">"+time
+						+"</td><td id='type' value="+type+">"+type
+						+"</td><td id='hour' value="+hour+">"+hour
+						+"</td><td id='comment' value="+comment+">"+comment							
+					+"<td>"
+					+"<button class="
+					+"'btn-danger btn'"
+					+" Type="
+					+ "'button'" 
+					+"id="
+					+"'delete'"
+					+"onclick="
+					+"del("+pk+")"
+					+">刪除</button></td>"
+					+"<td>"
+					+"<button class="
+					+"'btn-success btn'"
+					+" Type="
+					+ "'button'" 
+					+"id="
+					+"'delete'"
+					+"data-bs-toggle="
+					+"'modal'"
+					+"data-bs-target="
+					+"'#exampleModal'"
+					+"onclick="
+					+"getUpdateRecord("+pk+")"
+					+">修改</button></td>"
+					+"</tr>"
+					
+			   });
+				$("#repeatData").append(fragment);
+				}
+			}); */
+
 		$(function() {
 			$("#datepicker").datepicker({
 				dateFormat : "yy-mm-dd",
@@ -275,8 +316,8 @@ tr:last-child td:last-child {
 			});
 		});
 		
-		$("#addData").click(function() {
-
+		$("#addData").click(function(event) {
+			
 			var data = {
 				"time" : $("#datepicker").val(),
 				"hour" : $("#hour").val(),
@@ -289,63 +330,64 @@ tr:last-child td:last-child {
 				data : JSON.stringify(data), // 傳送資料到指定的 url
 				dataType : "json",
 				contentType : "application/json",
-				success : function(e) { // request 成功取得回應後執行
+				complete : function() {
+				location.reload();
 				}
+			
 			});
+
 		});
-	});
-	
-	function del(data) {
-		var data = {"id":data};
-		$.ajax({
-			url : "/DeleteRecord", // 資料請求的網址
-			type : "POST", // GET | POST | PUT | DELETE | PATCH
-			data : JSON.stringify(data), // 傳送資料到指定的 url
-			dataType : "json",
-			contentType : "application/json",
-			success : function(data) { // request 成功取得回應後執行
-				console.log(data);
-			}
-		});		
-	};
-		function getUpdateRecord(id) {	
-		var data = {"id":id};
-		$.ajax({
-			url : "/GetUpdateRecord", // 資料請求的網址
-			type : "POST", // GET | POST | PUT | DELETE | PATCH
-			data :  JSON.stringify(data), // 傳送資料到指定的 url
-			contentType : "application/json",
-			success : function(QueryData) { // request 成功取得回應後執行
-				$("#updateId").val(id);
-				$("#updateDatepicker").val(QueryData.time);
-				$("#updateType").val(QueryData.type);
-				$("#updateHour").val(QueryData.hour);
-				$("#updateComment").val(QueryData.comment);
-			}
-		});
-	}
-		
-		$("#save").click(function() {
-			var data = {
-				"pk" : $("#updateId").val(),
-				"time" : $("#updateDatepicker").val(),
-				"hour" : $("#updateHour").val(),
-				"comment" : $("#updateComment").val(),
-				"type" : $("#updateType").val(),
-			};
+	});	
+		function del(data) {
+			var data = {"id":data};
 			$.ajax({
-				url : "/UpdateRecord", // 資料請求的網址
+				url : "/DeleteRecord", // 資料請求的網址
 				type : "POST", // GET | POST | PUT | DELETE | PATCH
 				data : JSON.stringify(data), // 傳送資料到指定的 url
 				dataType : "json",
 				contentType : "application/json",
-				success : function(data) { // request 成功取得回應後執行
-					
+				complete : function() {
+					location.reload();
+				}
+			});	
+		};
+			function getUpdateRecord(id) {	
+			var data = {"id":id};
+			$.ajax({
+				url : "/GetUpdateRecord", // 資料請求的網址
+				type : "POST", // GET | POST | PUT | DELETE | PATCH
+				data :  JSON.stringify(data), // 傳送資料到指定的 url
+				contentType : "application/json",
+				success : function(QueryData) { // request 成功取得回應後執行
+					$("#updateId").val(id);
+					$("#updateDatepicker").val(QueryData.time);
+					$("#updateType").val(QueryData.type);
+					$("#updateHour").val(QueryData.hour);
+					$("#updateComment").val(QueryData.comment);
 				}
 			});
-			$("#exampleModal").modal("hide");
-			location.reload();
-		});
-
-
+		}
+			
+			$("#save").click(function() {
+				var data = {
+					"pk" : $("#updateId").val(),
+					"time" : $("#updateDatepicker").val(),
+					"hour" : $("#updateHour").val(),
+					"comment" : $("#updateComment").val(),
+					"type" : $("#updateType").val(),
+				};
+				$.ajax({
+					url : "/UpdateRecord", // 資料請求的網址
+					type : "POST", // GET | POST | PUT | DELETE | PATCH
+					data : JSON.stringify(data), // 傳送資料到指定的 url
+					dataType : "json",
+					contentType : "application/json",
+					complete : function() {
+						$("#exampleModal").modal("hide");
+						location.reload();
+					}
+				});
+				
+			});
+	
 </script>

@@ -1,5 +1,6 @@
 package com.example.restservice.controller;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,12 +11,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import com.example.restservice.entity.TimeTable;
 import com.example.restservice.service.TimeTableService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 
 @Controller
 public class TimeTableController {
@@ -65,5 +65,16 @@ public class TimeTableController {
 		timeTableService.updateRecord(timetable);
 		return mav;
 	}
+	
+	@GetMapping("getAllRecords")
+    @ResponseBody
+    public Map<Integer, TimeTable> getAllRecords() {
+        Map<Integer, TimeTable> data = new HashMap<>();
+        List<TimeTable> TimeTable = timeTableService.showAll();
+        for(TimeTable t: TimeTable) {
+        	data.put(t.getPk(), t);
+        }
+        return data;
+    }
 	
 }
